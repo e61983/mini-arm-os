@@ -13,6 +13,29 @@ typedef struct {
 	uint8_t in_use;
 } tcb_t;
 
+typedef struct{
+    uint32_t r0;
+    uint32_t r1;
+    uint32_t r2;
+    uint32_t r3;
+    uint32_t r12;
+    uint32_t lr;
+    uint32_t pc;
+    uint32_t xpsr;
+} userStack_auto;
+
+typedef struct{
+    uint32_t r4;
+    uint32_t r5;
+    uint32_t r6;
+    uint32_t r7;
+    uint32_t r8;
+    uint32_t r9;
+    uint32_t r10;
+    uint32_t r11;
+    uint32_t lr;
+} userStack_manaul;
+
 static tcb_t tasks[MAX_TASKS];
 static int lastTask;
 static int first = 1;
@@ -94,16 +117,18 @@ int thread_create(void (*run)(void *), void *userdata)
 		return -1;
 
 	stack += STACK_SIZE - 32; /* End of stack, minus what we are about to push */
+    userStack_manaul *m = (userStack_manaul *)stack;
+    userStack_auto *a = (userStack_auto *) (stack + sizeof(userStack_manaul)/sizeof(uint32_t)) ;
 	if (first) {
-		stack[8] = (unsigned int) run;
-		stack[9] = (unsigned int) userdata;
+        m->lr = (unsigned int) run;
+        a->r0 = (unsigned int) userdata;
 		first = 0;
 	} else {
-		stack[8] = (unsigned int) THREAD_PSP;
-		stack[9] = (unsigned int) userdata;
-		stack[14] = (unsigned) &thread_self_terminal;
-		stack[15] = (unsigned int) run;
-		stack[16] = (unsigned int) 0x21000000; /* PSR Thumb bit */
+        m->lr = (unsigned int) THREAD_PSP;
+        a->r0 = (unsigned int) userdata;
+        a->lr = (unsigned) &thread_self_terminal;
+        a->pc = (unsigned) run;
+        a->xpsr = (unsigned int) 0x21000000; /* PSR Thumb bit */
 	}
 
 	/* Construct the control block */
