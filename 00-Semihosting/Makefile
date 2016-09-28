@@ -7,7 +7,7 @@ CFLAGS = -fno-common -O0 -std=gnu99 \
 TARGET = semi.bin
 all: $(TARGET)
 
-$(TARGET): semi.c startup.c
+$(TARGET):  startup.c semi.c main.c
 	$(CC) $(CFLAGS) $^ -o semi.elf
 	$(CROSS_COMPILE)objcopy -Obinary semi.elf semi.bin
 	$(CROSS_COMPILE)objdump -S semi.elf > semi.list
