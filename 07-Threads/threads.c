@@ -15,7 +15,7 @@ typedef struct {
 
 #define AUTO(reg) auto_##reg
 enum{
-    AUTO(r0) = 0,
+    AUTO(r0) = 9,
     AUTO(r1),
     AUTO(r2),
     AUTO(r3),
